@@ -37,21 +37,21 @@
                 <label class="block text-sm font-semibold text-slate-700 mb-1">Gaji Bruto Bulanan</label>
                 <div class="relative">
                     <span class="absolute left-3 top-2.5 text-slate-500">Rp</span>
-                    <input type="text" inputmode="numeric" id="gaji" class="input-rupiah w-full border border-slate-300 rounded-lg py-2 pl-10 pr-3 focus:outline-none focus:ring-2 focus:ring-blue-500" value="0">
+                    <input type="text" inputmode="numeric" id="gaji" class="input-rupiah w-full border border-slate-300 rounded-lg py-2 pl-10 pr-3 focus:outline-none focus:ring-2 focus:ring-blue-500" value="7.700.000">
                 </div>
             </div>
             <div>
                 <label class="block text-sm font-semibold text-slate-700 mb-1">THR / Bonus</label>
                 <div class="relative">
                     <span class="absolute left-3 top-2.5 text-slate-500">Rp</span>
-                    <input type="text" inputmode="numeric" id="thr" class="input-rupiah w-full border border-slate-300 rounded-lg py-2 pl-10 pr-3 focus:outline-none focus:ring-2 focus:ring-blue-500" value="0">
+                    <input type="text" inputmode="numeric" id="thr" class="input-rupiah w-full border border-slate-300 rounded-lg py-2 pl-10 pr-3 focus:outline-none focus:ring-2 focus:ring-blue-500" value="7.525.000">
                 </div>
             </div>
             <div>
                 <label class="block text-sm font-semibold text-slate-700 mb-1">Potongan Tetap (BPJS dll)</label>
                 <div class="relative">
                     <span class="absolute left-3 top-2.5 text-slate-500">Rp</span>
-                    <input type="text" inputmode="numeric" id="potongan_tetap" class="input-rupiah w-full border border-slate-300 rounded-lg py-2 pl-10 pr-3 focus:outline-none focus:ring-2 focus:ring-blue-500" value="0">
+                    <input type="text" inputmode="numeric" id="potongan_tetap" class="input-rupiah w-full border border-slate-300 rounded-lg py-2 pl-10 pr-3 focus:outline-none focus:ring-2 focus:ring-blue-500" value="73.790">
                 </div>
             </div>
         </div>
@@ -77,7 +77,7 @@
                 <span id="out_total_potongan">- Rp 0</span>
             </div>
             <div class="flex justify-between items-center text-emerald-600 font-bold text-lg pt-1">
-                <span>Gaji Diterima:</span>
+                <span>Gaji Diterima (Masuk Rekening):</span>
                 <span id="out_gaji_bersih">Rp 0</span>
             </div>
         </div>
@@ -91,38 +91,77 @@
                 'K/3': 'C'
             };
 
+            // Master data TER sudah disesuaikan persis dengan tabel gambar PP 58/2023
             const tarifTER = {
                 'A': [
-                    { max: 5400000, rate: 0 }, { max: 5650000, rate: 0.0025 },
-                    { max: 5950000, rate: 0.005 }, { max: 6300000, rate: 0.0075 },
-                    { max: 6750000, rate: 0.01 }, { max: 7500000, rate: 0.0125 },
-                    { max: 8550000, rate: 0.015 }, { max: 9650000, rate: 0.0175 },
-                    { max: 10050000, rate: 0.02 }, { max: 10350000, rate: 0.0225 },
-                    { max: 10700000, rate: 0.025 }, { max: 11050000, rate: 0.03 },
-                    { max: 11600000, rate: 0.04 }, { max: 12500000, rate: 0.05 },
-                    { max: 13750000, rate: 0.06 }, { max: 15100000, rate: 0.07 },
-                    { max: 16950000, rate: 0.08 }, { max: Infinity, rate: 0.09 }
+                    { max: 5400000, rate: 0.00 }, { max: 5650000, rate: 0.0025 },
+                    { max: 5950000, rate: 0.0050 }, { max: 6300000, rate: 0.0075 },
+                    { max: 6750000, rate: 0.0100 }, { max: 7500000, rate: 0.0125 },
+                    { max: 8550000, rate: 0.0150 }, { max: 9650000, rate: 0.0175 },
+                    { max: 10050000, rate: 0.0200 }, { max: 10350000, rate: 0.0225 },
+                    { max: 10700000, rate: 0.0250 }, { max: 11050000, rate: 0.0300 },
+                    { max: 11600000, rate: 0.0350 }, { max: 12500000, rate: 0.0400 },
+                    { max: 13750000, rate: 0.0500 }, { max: 15100000, rate: 0.0600 },
+                    { max: 16950000, rate: 0.0700 }, { max: 19750000, rate: 0.0800 },
+                    { max: 24150000, rate: 0.0900 }, { max: 26450000, rate: 0.1000 },
+                    { max: 28000000, rate: 0.1100 }, { max: 30050000, rate: 0.1200 },
+                    { max: 32400000, rate: 0.1300 }, { max: 35400000, rate: 0.1400 },
+                    { max: 39100000, rate: 0.1500 }, { max: 43850000, rate: 0.1600 },
+                    { max: 47800000, rate: 0.1700 }, { max: 51400000, rate: 0.1800 },
+                    { max: 56300000, rate: 0.1900 }, { max: 62200000, rate: 0.2000 },
+                    { max: 68600000, rate: 0.2100 }, { max: 77500000, rate: 0.2200 },
+                    { max: 89000000, rate: 0.2300 }, { max: 103000000, rate: 0.2400 },
+                    { max: 125000000, rate: 0.2500 }, { max: 157000000, rate: 0.2600 },
+                    { max: 206000000, rate: 0.2700 }, { max: 337000000, rate: 0.2800 },
+                    { max: 454000000, rate: 0.2900 }, { max: 550000000, rate: 0.3000 },
+                    { max: 695000000, rate: 0.3100 }, { max: 910000000, rate: 0.3200 },
+                    { max: 1400000000, rate: 0.3300 }, { max: Infinity, rate: 0.3400 }
                 ],
                 'B': [
-                    { max: 6200000, rate: 0 }, { max: 6500000, rate: 0.0025 },
-                    { max: 6950000, rate: 0.005 }, { max: 7350000, rate: 0.0075 },
-                    { max: 7800000, rate: 0.01 }, { max: 8850000, rate: 0.0125 },
-                    { max: 9800000, rate: 0.015 }, { max: 10950000, rate: 0.0175 },
-                    { max: 11200000, rate: 0.02 }, { max: 13400000, rate: 0.03 },
-                    { max: 14100000, rate: 0.04 }, { max: 15550000, rate: 0.06 },
-                    { max: 16950000, rate: 0.07 }, { max: 17500000, rate: 0.08 },
-                    { max: Infinity, rate: 0.09 } 
+                    { max: 6200000, rate: 0.00 }, { max: 6500000, rate: 0.0025 },
+                    { max: 6850000, rate: 0.0050 }, { max: 7300000, rate: 0.0075 },
+                    { max: 9200000, rate: 0.0100 }, { max: 10750000, rate: 0.0150 },
+                    { max: 11250000, rate: 0.0200 }, { max: 11600000, rate: 0.0250 },
+                    { max: 12600000, rate: 0.0300 }, { max: 13600000, rate: 0.0400 },
+                    { max: 14950000, rate: 0.0500 }, { max: 16400000, rate: 0.0600 },
+                    { max: 18450000, rate: 0.0700 }, { max: 21850000, rate: 0.0800 },
+                    { max: 26000000, rate: 0.0900 }, { max: 27700000, rate: 0.1000 },
+                    { max: 29350000, rate: 0.1100 }, { max: 31450000, rate: 0.1200 },
+                    { max: 33950000, rate: 0.1300 }, { max: 37100000, rate: 0.1400 },
+                    { max: 41100000, rate: 0.1500 }, { max: 45800000, rate: 0.1600 },
+                    { max: 49500000, rate: 0.1700 }, { max: 53800000, rate: 0.1800 },
+                    { max: 58500000, rate: 0.1900 }, { max: 64000000, rate: 0.2000 },
+                    { max: 71000000, rate: 0.2100 }, { max: 80000000, rate: 0.2200 },
+                    { max: 93000000, rate: 0.2300 }, { max: 109000000, rate: 0.2400 },
+                    { max: 129000000, rate: 0.2500 }, { max: 163000000, rate: 0.2600 },
+                    { max: 211000000, rate: 0.2700 }, { max: 374000000, rate: 0.2800 },
+                    { max: 459000000, rate: 0.2900 }, { max: 555000000, rate: 0.3000 },
+                    { max: 704000000, rate: 0.3100 }, { max: 957000000, rate: 0.3200 },
+                    { max: 1405000000, rate: 0.3300 }, { max: Infinity, rate: 0.3400 }
                 ],
                 'C': [
-                    { max: 6600000, rate: 0 }, { max: 6950000, rate: 0.0025 },
-                    { max: 7350000, rate: 0.005 }, { max: 7800000, rate: 0.0075 },
-                    { max: 8300000, rate: 0.01 }, { max: 8950000, rate: 0.0125 },
-                    { max: 9600000, rate: 0.015 }, { max: 10400000, rate: 0.0175 },
-                    { max: 10800000, rate: 0.02 }, { max: 11150000, rate: 0.0225 },
-                    { max: 11600000, rate: 0.025 }, { max: 12400000, rate: 0.03 },
-                    { max: 13200000, rate: 0.04 }, { max: 14100000, rate: 0.05 },
-                    { max: 15550000, rate: 0.06 }, { max: 17050000, rate: 0.07 },
-                    { max: 18300000, rate: 0.08 }, { max: Infinity, rate: 0.09 }
+                    { max: 6600000, rate: 0.00 }, { max: 6950000, rate: 0.0025 },
+                    { max: 7350000, rate: 0.0050 }, { max: 7800000, rate: 0.0075 },
+                    { max: 8300000, rate: 0.0100 }, { max: 8950000, rate: 0.0125 },
+                    { max: 9600000, rate: 0.0150 }, { max: 10400000, rate: 0.0175 },
+                    { max: 10800000, rate: 0.0200 }, { max: 11150000, rate: 0.0225 },
+                    { max: 11600000, rate: 0.0250 }, { max: 12400000, rate: 0.0300 },
+                    { max: 13200000, rate: 0.0400 }, { max: 14100000, rate: 0.0500 },
+                    { max: 15550000, rate: 0.0600 }, { max: 17050000, rate: 0.0700 },
+                    { max: 18300000, rate: 0.0800 }, { max: 22700000, rate: 0.0900 },
+                    { max: 26600000, rate: 0.1000 }, { max: 28100000, rate: 0.1100 },
+                    { max: 30100000, rate: 0.1200 }, { max: 32600000, rate: 0.1300 },
+                    { max: 35900000, rate: 0.1400 }, { max: 38900000, rate: 0.1500 },
+                    { max: 43000000, rate: 0.1600 }, { max: 47400000, rate: 0.1700 },
+                    { max: 51200000, rate: 0.1800 }, { max: 55800000, rate: 0.1900 },
+                    { max: 60400000, rate: 0.2000 }, { max: 66700000, rate: 0.2100 },
+                    { max: 74500000, rate: 0.2200 }, { max: 83200000, rate: 0.2300 },
+                    { max: 95600000, rate: 0.2400 }, { max: 110000000, rate: 0.2500 },
+                    { max: 134000000, rate: 0.2600 }, { max: 169000000, rate: 0.2700 },
+                    { max: 221000000, rate: 0.2800 }, { max: 390000000, rate: 0.2900 },
+                    { max: 463000000, rate: 0.3000 }, { max: 561000000, rate: 0.3100 },
+                    { max: 709000000, rate: 0.3200 }, { max: 965000000, rate: 0.3300 },
+                    { max: 1419000000, rate: 0.3400 }, { max: Infinity, rate: 0.3400 }
                 ]
             };
 
@@ -163,12 +202,18 @@
                 let tarif = getDynamicRate(kategoriTer, totalBruto);
                 let nominalPajak = totalBruto * tarif;
                 let totalPotongan = nominalPajak + potonganTetap;
+                
+                // Gaji Bersih = Gaji Bruto Bulanan - (Total Pajak + Potongan Tetap)
                 let gajiBersih = gaji - totalPotongan;
 
                 // Update UI
                 $('#out_kategori').text('TER ' + kategoriTer);
                 $('#out_bruto').text(formatRupiah(totalBruto));
-                $('#out_tarif').text((tarif * 100) + '%');
+                
+                // Tampilkan desimal maksimal 2 angka jika persentasenya berkoma (misal 1.25%)
+                let persenTarif = parseFloat((tarif * 100).toFixed(2));
+                $('#out_tarif').text(persenTarif + '%');
+                
                 $('#out_pajak').text('- ' + formatRupiah(nominalPajak));
                 $('#out_total_potongan').text('- ' + formatRupiah(totalPotongan));
                 $('#out_gaji_bersih').text(formatRupiah(gajiBersih));
