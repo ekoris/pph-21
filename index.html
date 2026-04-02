@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Gaji & PPh 21 Dinamis (PP 58/2023)</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 min-h-screen flex items-center justify-center p-4 font-sans">
+
+    <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md border border-slate-200">
+        <h2 class="text-2xl font-bold mb-1 text-slate-800">Kalkulator PPh 21</h2>
+        <p class="text-sm text-slate-500 mb-6 border-b pb-4">Berdasarkan PP No. 58 Tahun 2023</p>
+
+        <div class="space-y-4 mb-8">
+            <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-1">Status PTKP (Tanggungan)</label>
+                <select id="status_ptkp" class="w-full border border-slate-300 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                    <optgroup label="TER A">
+                        <option value="TK/0">TK/0 (Tidak Kawin, 0 Tanggungan)</option>
+                        <option value="TK/1">TK/1 (Tidak Kawin, 1 Tanggungan)</option>
+                        <option value="K/0">K/0 (Kawin, 0 Tanggungan)</option>
+                    </optgroup>
+                    <optgroup label="TER B">
+                        <option value="TK/2">TK/2 (Tidak Kawin, 2 Tanggungan)</option>
+                        <option value="TK/3">TK/3 (Tidak Kawin, 3 Tanggungan)</option>
+                        <option value="K/1" selected>K/1 (Kawin, 1 Tanggungan)</option>
+                        <option value="K/2">K/2 (Kawin, 2 Tanggungan)</option>
+                    </optgroup>
+                    <optgroup label="TER C">
+                        <option value="K/3">K/3 (Kawin, 3 Tanggungan)</option>
+                    </optgroup>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-1">Gaji Bruto Bulanan</label>
+                <div class="relative">
+                    <span class="absolute left-3 top-2.5 text-slate-500">Rp</span>
+                    <input type="number" id="gaji" class="w-full border border-slate-300 rounded-lg py-2 pl-10 pr-3 focus:outline-none focus:ring-2 focus:ring-blue-500" value="7700000">
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-1">THR / Bonus</label>
+                <div class="relative">
+                    <span class="absolute left-3 top-2.5 text-slate-500">Rp</span>
+                    <input type="number" id="thr" class="w-full border border-slate-300 rounded-lg py-2 pl-10 pr-3 focus:outline-none focus:ring-2 focus:ring-blue-500" value="7700000">
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-1">Potongan Tetap (BPJS dll)</label>
+                <div class="relative">
+                    <span class="absolute left-3 top-2.5 text-slate-500">Rp</span>
+                    <input type="number" id="potongan_tetap" class="w-full border border-slate-300 rounded-lg py-2 pl-10 pr-3 focus:outline-none focus:ring-2 focus:ring-blue-500" value="63290">
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-slate-50 p-4 rounded-lg border border-slate-100 space-y-3 text-sm text-slate-600">
+            <div class="flex justify-between items-center">
+                <span>Total Bruto:</span>
+                <span id="out_bruto" class="font-semibold text-slate-800">Rp 0</span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span>Kategori & Tarif TER:</span>
+                <div>
+                    <span id="out_kategori" class="font-semibold bg-slate-200 text-slate-700 px-2 py-0.5 rounded text-xs mr-1">TER -</span>
+                    <span id="out_tarif" class="font-semibold bg-blue-100 text-blue-700 px-2 py-0.5 rounded">0%</span>
+                </div>
+            </div>
+            <div class="flex justify-between items-center text-red-500">
+                <span>Potongan PPh 21:</span>
+                <span id="out_pajak">- Rp 0</span>
+            </div>
+            <div class="flex justify-between items-center text-red-500 pb-3 border-b border-slate-200">
+                <span>Total Semua Potongan:</span>
+                <span id="out_total_potongan">- Rp 0</span>
+            </div>
+            <div class="flex justify-between items-center text-emerald-600 font-bold text-lg pt-1">
+                <span>Gaji Diterima:</span>
+                <span id="out_gaji_bersih">Rp 0</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            const ptkpMapping = {
+                'TK/0': 'A', 'TK/1': 'A', 'K/0': 'A',
+                'TK/2': 'B', 'TK/3': 'B', 'K/1': 'B', 'K/2': 'B',
+                'K/3': 'C'
+            };
+
+            const tarifTER = {
+                'A': [
+                    { max: 5400000, rate: 0 }, { max: 5650000, rate: 0.0025 },
+                    { max: 5950000, rate: 0.005 }, { max: 6300000, rate: 0.0075 },
+                    { max: 6750000, rate: 0.01 }, { max: 7500000, rate: 0.0125 },
+                    { max: 8550000, rate: 0.015 }, { max: 9650000, rate: 0.0175 },
+                    { max: 10050000, rate: 0.02 }, { max: 10350000, rate: 0.0225 },
+                    { max: 10700000, rate: 0.025 }, { max: 11050000, rate: 0.03 },
+                    { max: 11600000, rate: 0.04 }, { max: 12500000, rate: 0.05 },
+                    { max: 13750000, rate: 0.06 }, { max: 15100000, rate: 0.07 },
+                    { max: 16950000, rate: 0.08 }, { max: Infinity, rate: 0.09 }
+                ],
+                'B': [
+                    { max: 6200000, rate: 0 }, { max: 6500000, rate: 0.0025 },
+                    { max: 6950000, rate: 0.005 }, { max: 7350000, rate: 0.0075 },
+                    { max: 7800000, rate: 0.01 }, { max: 8850000, rate: 0.0125 },
+                    { max: 9800000, rate: 0.015 }, { max: 10950000, rate: 0.0175 },
+                    { max: 11200000, rate: 0.02 }, { max: 13400000, rate: 0.03 },
+                    { max: 14100000, rate: 0.04 }, { max: 15550000, rate: 0.06 },
+                    { max: 16950000, rate: 0.07 }, { max: 17500000, rate: 0.08 },
+                    { max: Infinity, rate: 0.09 } 
+                ],
+                'C': [
+                    { max: 6600000, rate: 0 }, { max: 6950000, rate: 0.0025 },
+                    { max: 7350000, rate: 0.005 }, { max: 7800000, rate: 0.0075 },
+                    { max: 8300000, rate: 0.01 }, { max: 8950000, rate: 0.0125 },
+                    { max: 9600000, rate: 0.015 }, { max: 10400000, rate: 0.0175 },
+                    { max: 10800000, rate: 0.02 }, { max: 11150000, rate: 0.0225 },
+                    { max: 11600000, rate: 0.025 }, { max: 12400000, rate: 0.03 },
+                    { max: 13200000, rate: 0.04 }, { max: 14100000, rate: 0.05 },
+                    { max: 15550000, rate: 0.06 }, { max: 17050000, rate: 0.07 },
+                    { max: 18300000, rate: 0.08 }, { max: Infinity, rate: 0.09 }
+                ]
+            };
+
+            const formatRupiah = (angka) => {
+                return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
+            };
+
+            const getDynamicRate = (kategori, bruto) => {
+                const rentang = tarifTER[kategori];
+                for (let i = 0; i < rentang.length; i++) {
+                    if (bruto <= rentang[i].max) {
+                        return rentang[i].rate;
+                    }
+                }
+                return 0; 
+            };
+
+            const hitungPajak = () => {
+                let status = $('#status_ptkp').val();
+                let kategoriTer = ptkpMapping[status];
+                
+                let gaji = parseFloat($('#gaji').val()) || 0;
+                let thr = parseFloat($('#thr').val()) || 0;
+                let potonganTetap = parseFloat($('#potongan_tetap').val()) || 0;
+
+                let totalBruto = gaji + thr;
+                
+                let tarif = getDynamicRate(kategoriTer, totalBruto);
+                let nominalPajak = totalBruto * tarif;
+                let totalPotongan = nominalPajak + potonganTetap;
+                let gajiBersih = gaji - totalPotongan;
+
+                $('#out_kategori').text('TER ' + kategoriTer);
+                $('#out_bruto').text(formatRupiah(totalBruto));
+                $('#out_tarif').text((tarif * 100) + '%');
+                $('#out_pajak').text('- ' + formatRupiah(nominalPajak));
+                $('#out_total_potongan').text('- ' + formatRupiah(totalPotongan));
+                $('#out_gaji_bersih').text(formatRupiah(gajiBersih));
+            };
+
+            hitungPajak();
+            
+            $('input, select').on('input change', hitungPajak);
+        });
+    </script>
+</body>
+</html>
