@@ -37,21 +37,21 @@
                 <label class="block text-sm font-semibold text-slate-700 mb-1">Gaji Bruto Bulanan</label>
                 <div class="relative">
                     <span class="absolute left-3 top-2.5 text-slate-500">Rp</span>
-                    <input type="number" id="gaji" class="w-full border border-slate-300 rounded-lg py-2 pl-10 pr-3 focus:outline-none focus:ring-2 focus:ring-blue-500" value="7700000">
+                    <input type="text" inputmode="numeric" id="gaji" class="input-rupiah w-full border border-slate-300 rounded-lg py-2 pl-10 pr-3 focus:outline-none focus:ring-2 focus:ring-blue-500" value="0">
                 </div>
             </div>
             <div>
                 <label class="block text-sm font-semibold text-slate-700 mb-1">THR / Bonus</label>
                 <div class="relative">
                     <span class="absolute left-3 top-2.5 text-slate-500">Rp</span>
-                    <input type="number" id="thr" class="w-full border border-slate-300 rounded-lg py-2 pl-10 pr-3 focus:outline-none focus:ring-2 focus:ring-blue-500" value="7700000">
+                    <input type="text" inputmode="numeric" id="thr" class="input-rupiah w-full border border-slate-300 rounded-lg py-2 pl-10 pr-3 focus:outline-none focus:ring-2 focus:ring-blue-500" value="0">
                 </div>
             </div>
             <div>
                 <label class="block text-sm font-semibold text-slate-700 mb-1">Potongan Tetap (BPJS dll)</label>
                 <div class="relative">
                     <span class="absolute left-3 top-2.5 text-slate-500">Rp</span>
-                    <input type="number" id="potongan_tetap" class="w-full border border-slate-300 rounded-lg py-2 pl-10 pr-3 focus:outline-none focus:ring-2 focus:ring-blue-500" value="63290">
+                    <input type="text" inputmode="numeric" id="potongan_tetap" class="input-rupiah w-full border border-slate-300 rounded-lg py-2 pl-10 pr-3 focus:outline-none focus:ring-2 focus:ring-blue-500" value="0">
                 </div>
             </div>
         </div>
@@ -126,10 +126,12 @@
                 ]
             };
 
+            // Fungsi format rupiah untuk hasil akhir
             const formatRupiah = (angka) => {
                 return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
             };
 
+            // Fungsi mengambil tarif
             const getDynamicRate = (kategori, bruto) => {
                 const rentang = tarifTER[kategori];
                 for (let i = 0; i < rentang.length; i++) {
@@ -140,13 +142,21 @@
                 return 0; 
             };
 
+            // Fungsi untuk membersihkan titik sebelum kalkulasi matematis
+            const parseRupiahInput = (val) => {
+                let cleanVal = val.replace(/\./g, ''); // Hapus semua titik
+                return parseFloat(cleanVal) || 0;      // Ubah ke float, default 0 jika kosong/NaN
+            };
+
+            // Logika perhitungan utama
             const hitungPajak = () => {
                 let status = $('#status_ptkp').val();
                 let kategoriTer = ptkpMapping[status];
                 
-                let gaji = parseFloat($('#gaji').val()) || 0;
-                let thr = parseFloat($('#thr').val()) || 0;
-                let potonganTetap = parseFloat($('#potongan_tetap').val()) || 0;
+                // Ambil nilai dan bersihkan format titiknya
+                let gaji = parseRupiahInput($('#gaji').val());
+                let thr = parseRupiahInput($('#thr').val());
+                let potonganTetap = parseRupiahInput($('#potongan_tetap').val());
 
                 let totalBruto = gaji + thr;
                 
@@ -155,6 +165,7 @@
                 let totalPotongan = nominalPajak + potonganTetap;
                 let gajiBersih = gaji - totalPotongan;
 
+                // Update UI
                 $('#out_kategori').text('TER ' + kategoriTer);
                 $('#out_bruto').text(formatRupiah(totalBruto));
                 $('#out_tarif').text((tarif * 100) + '%');
@@ -163,9 +174,28 @@
                 $('#out_gaji_bersih').text(formatRupiah(gajiBersih));
             };
 
+            // EVENT LISTENER: Format input saat user mengetik
+            $('.input-rupiah').on('input', function() {
+                // Ambil nilai, hapus karakter selain angka
+                let rawValue = $(this).val().replace(/[^0-9]/g, '');
+                
+                // Jika tidak kosong, format dengan pemisah ribuan (titik)
+                if (rawValue !== '') {
+                    // Number(rawValue) digunakan agar "00" menjadi "0", lalu diformat ke lokal ID
+                    $(this).val(new Intl.NumberFormat('id-ID').format(Number(rawValue)));
+                } else {
+                    $(this).val('');
+                }
+                
+                // Panggil perhitungan setiap kali ada perubahan
+                hitungPajak();
+            });
+
+            // EVENT LISTENER: Ubah status PTKP
+            $('#status_ptkp').on('change', hitungPajak);
+
+            // Hitung pertama kali saat halaman di-load
             hitungPajak();
-            
-            $('input, select').on('input change', hitungPajak);
         });
     </script>
 </body>
